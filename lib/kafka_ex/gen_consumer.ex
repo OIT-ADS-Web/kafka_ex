@@ -56,7 +56,7 @@ defmodule KafkaEx.GenConsumer do
   of consumed messages.  KafkaEx supports two commit strategies: asynchronous
   and synchronous.  The return value of `c:handle_message_set/2` determines
   which strategy is used:
-  
+
   * `{:sync_commit, new_state}` causes synchronous offset commits.
   * `{:async_commit, new_state}` causes asynchronous offset commits.
 
@@ -98,7 +98,7 @@ defmodule KafkaEx.GenConsumer do
   * `:commit_threshold` is the maximum number of acknowledged messages that a
     `KafkaEx.GenConsumer` will allow to be uncommitted before triggering a
     commit.
-  
+
   These can be set globally in the `:kafka_ex` app's environment or on a
   per-consumer basis by passing options to `start_link/5`:
 
@@ -120,7 +120,7 @@ defmodule KafkaEx.GenConsumer do
 
   ## Handler state and interaction
 
-  Use the `c:init/2` to initialize consumer state and `c:handle_call/3` 
+  Use the `c:init/2` to initialize consumer state and `c:handle_call/3`
   to interact.
 
   Example:
@@ -447,6 +447,12 @@ defmodule KafkaEx.GenConsumer do
   end
 
   def handle_info(:timeout, %State{} = state) do
+    new_state = consume(state)
+
+    {:noreply, new_state, 0}
+  end
+
+  def handle_info({:EXIT, _pid, :normal}, %State{} = state) do
     new_state = consume(state)
 
     {:noreply, new_state, 0}
